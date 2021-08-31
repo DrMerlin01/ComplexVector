@@ -4,6 +4,7 @@
 #include <new>
 #include <utility>
 #include <memory>
+#include <algorithm>
 
 template <typename T>
 class RawMemory {
@@ -120,9 +121,7 @@ public:
 				Vector rhs_copy(rhs);
 				Swap(rhs_copy);
 			} else {
-				for (size_t i = 0; i < Size() && i < rhs.Size(); ++i) {
-					data_[i] = rhs.data_[i];
-				}
+				std::copy_n(rhs.begin(), Size() < rhs.Size() ? Size() : rhs.Size(), begin());
 				if (Size() <= rhs.Size()) {
 					std::uninitialized_copy_n(rhs.begin() + Size(), rhs.Size() - Size(), begin());
 				} else if (Size() > rhs.Size()) {
@@ -158,11 +157,7 @@ public:
 		}
 
 		RawMemory<T> new_data(new_capacity);
-		if constexpr (std::is_nothrow_move_constructible_v<T> || !std::is_copy_constructible_v<T>) {
-			std::uninitialized_move_n(begin(), Size(), new_data.GetAddress());
-		} else {
-			std::uninitialized_copy_n(begin(), Size(), new_data.GetAddress());
-		}
+		UninitializedArray(begin(), Size(), new_data.GetAddress());
 		std::destroy_n(begin(), Size());
 		data_.Swap(new_data);
 	}
@@ -266,11 +261,7 @@ public:
 		if (Size() == Capacity()) {
 			RawMemory<T> new_data(Size() == 0 ? 1 : Size() * 2);
 			new (new_data + Size()) T(std::forward<Args>(args)...);
-			if constexpr (std::is_nothrow_move_constructible_v<T> || !std::is_copy_constructible_v<T>) {
-				std::uninitialized_move_n(begin(), Size(), new_data.GetAddress());
-			} else {
-				std::uninitialized_copy_n(begin(), Size(), new_data.GetAddress());
-			}
+			UninitializedArray(begin(), Size(), new_data.GetAddress());
 			std::destroy_n(begin(), Size());
 			data_.Swap(new_data);
 		} else {
@@ -314,4 +305,12 @@ public:
 private:
 	RawMemory<T> data_;
 	size_t size_ = 0;
+
+	void UninitializedArray(T* in, const size_t size, T* out) {
+		if constexpr (std::is_nothrow_move_constructible_v<T> || !std::is_copy_constructible_v<T>) {
+			std::uninitialized_move_n(in, size, out);
+		} else {
+			std::uninitialized_copy_n(in, size, out);
+		}
+	}
 };
