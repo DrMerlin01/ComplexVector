@@ -39,6 +39,7 @@ public:
 	T* operator+(size_t offset) noexcept {
 		// Разрешается получать адрес ячейки памяти, следующей за последним элементом массива
 		assert(offset <= capacity_);
+
 		return buffer_ + offset;
 	}
 
@@ -52,6 +53,7 @@ public:
 
 	T& operator[](size_t index) noexcept {
 		assert(index < capacity_);
+		
 		return buffer_[index];
 	}
 

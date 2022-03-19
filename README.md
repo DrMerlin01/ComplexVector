@@ -12,4 +12,3 @@ Container, analog of std::vector. Implemented move semantics for greater efficie
   2. GCC version 8.1.0
   3. Cmake 3.21.2 (minimal 3.10)
 # Future plans
-  1. Add tests for all functionality
