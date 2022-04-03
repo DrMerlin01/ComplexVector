@@ -10,6 +10,12 @@ else()
     set(SYSTEM_LIBS)
 endif()
 
+if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}/JMC")
+else()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic -Werror -Wno-unused-parameter -Wno-implicit-fallthrough")
+endif()
+
 set(INCLUDE_DIR inc)
 set(SOURCE_DIR src)
 
